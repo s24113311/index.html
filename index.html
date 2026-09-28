@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>From Logic Gates to AI - Interactive Learning Lab</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#0f172a',
+                            900: '#0b0f19',
+                            950: '#05070e'
+                        },
+                        accent: {
+                            blue: '#3b82f6',
+                            cyan: '#06b6d4',
+                            emerald: '#10b981',
+                            rose: '#f43f5e',
+                            amber: '#f59e0b',
+                            purple: '#a855f7'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+        }
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .wire-active {
+            stroke: #10b981;
+            stroke-dasharray: 8;
+            animation: dash 0.8s linear infinite;
+            filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.8));
+        }
+        .wire-inactive {
+            stroke: #334155;
+            stroke-dasharray: none;
+        }
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -16;
+            }
+        }
+        .pulse-glow {
+            animation: pulse-glow 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.9)); }
+            50% { opacity: 0.5; filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.3)); }
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.6);
+        }
+    </style>
+</head>
+<body class="bg-navy-900 text-gray-100 min-h-screen flex flex-col selection:bg-accent-blue selection:text-white">
+
+    <header class="sticky top-0 z-50 bg-navy-900/90 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="bg-gradient-to-tr from-blue-600 to-cyan-400 p-2 rounded-xl text-white shadow-lg shadow-blue-500/20">
+                        <i class="fa-solid fa-microchip text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">LOGIC2AI</span>
+                        <span class="text-xs text-slate-400 hidden sm:inline-block ml-2 border-l border-slate-700 pl-2">s24113311| 安貝雅 </span>
+                    </div>
+                </div>
+                <nav class="hidden lg:flex space-x-1 text-xs xl:text-sm font-medium">
+                    <a href="#lab" class="px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">1. Gate Lab</a>
+                    <a href="#truthtable" class="px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">2. Truth Tables</a>
+                    <a href="#universal" class="px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">3. Universal Gates</a>
+                    <a href="#xor-problem" class="px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">4. XOR Problem</a>
+                    <a href="#perceptron" class="px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">5. Perceptron</a>
+                    <a href="#timeline" class="px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">6. AI Timeline</a>
+                    <a href="#aitutor" class="px-3 py-2 rounded-lg text-cyan-400 hover:text-cyan-300 hover:bg-slate-800 transition flex items-center gap-1"><i class="fa-solid fa-sparkles"></i> AI Tutor</a>
+                </nav>
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleAudio()" id="audio-toggle-btn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition border border-slate-700">
+                        <i class="fa-solid fa-volume-xmark" id="audio-icon"></i>
+                        <span id="audio-label" class="hidden sm:inline">Sound OFF</span>
+                    </button>
+                    <a href="#lab" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition shadow-md shadow-blue-500/20">
+                        Start Lab
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="relative overflow-hidden pt-12 pb-14 bg-gradient-to-b from-navy-800 to-navy-900 border-b border-slate-800">
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-xs font-semibold text-cyan-400 mb-6">
+                <i class="fa-solid fa-graduation-cap"></i> Interactive Computer Architecture & Deep Learning Foundations
+            </div>
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight max-w-4xl mx-auto">
+                From <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400">Logic Gates</span> to <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400">Artificial Intelligence</span>
+            </h1>
+            <p class="mt-4 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto font-normal">
+                Bridge the gap between silicon hardware switches and modern deep learning. Experiment interactively with boolean gates, universal NAND circuits, non-linear classification, and trainable single-layer perceptrons.
+            </p>
+            <div class="mt-8 flex flex-wrap justify-center gap-4">
+                <a href="#lab" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm rounded-xl transition flex items-center gap-2 shadow-lg shadow-blue-600/30">
+                    <i class="fa-solid fa-bolt"></i> Explore Gate Circuits
+                </a>
+                <a href="#perceptron" class="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-medium text-sm rounded-xl transition flex items-center gap-2 shadow-lg shadow-purple-600/30">
+                    <i class="fa-solid fa-brain"></i> Train Neural Perceptron
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+
+        <section id="lab" class="scroll-mt-20">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 font-bold border border-blue-500/30 text-sm">1</span>
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Interactive Logic Gate Lab</h2>
+                    <p class="text-sm text-slate-400">Select a gate type and toggle binary inputs A and B to observe live signal propagation and boolean execution.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Control Panel & Schematic Visualizer -->
+                <div class="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <!-- Gate Selection Tabs -->
+                        <div class="flex flex-wrap gap-2 mb-6 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+                            <button onclick="selectGate('AND')" id="gate-btn-AND" class="gate-selector-btn px-4 py-2 rounded-lg text-xs font-bold transition bg-blue-600 text-white shadow">AND</button>
+                            <button onclick="selectGate('OR')" id="gate-btn-OR" class="gate-selector-btn px-4 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white">OR</button>
+                            <button onclick="selectGate('NOT')" id="gate-btn-NOT" class="gate-selector-btn px-4 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white">NOT</button>
+                            <button onclick="selectGate('NAND')" id="gate-btn-NAND" class="gate-selector-btn px-4 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white">NAND</button>
+                            <button onclick="selectGate('NOR')" id="gate-btn-NOR" class="gate-selector-btn px-4 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white">NOR</button>
+                            <button onclick="selectGate('XOR')" id="gate-btn-XOR" class="gate-selector-btn px-4 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white">XOR</button>
+                            <button onclick="selectGate('XNOR')" id="gate-btn-XNOR" class="gate-selector-btn px-4 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white">XNOR</button>
+                        </div>
+
+                        <!-- Circuit Diagram Canvas / SVG Area -->
+                        <div class="relative bg-slate-950/90 rounded-xl p-6 border border-slate-800 min-h-[260px] flex items-center justify-center overflow-hidden">
+                            <svg id="circuit-svg" class="w-full h-52 max-w-lg" viewBox="0 0 500 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Input Wire A -->
+                                <path id="wire-a" d="M 60 60 L 200 60" stroke="#334155" stroke-width="6" stroke-linecap="round"/>
+                                <!-- Input Wire B (Hidden for NOT) -->
+                                <path id="wire-b" d="M 60 140 L 200 140" stroke="#334155" stroke-width="6" stroke-linecap="round"/>
+                                <!-- Output Wire -->
+                                <path id="wire-out" d="M 320 100 L 420 100" stroke="#334155" stroke-width="6" stroke-linecap="round"/>
+
+                                <!-- Dynamic Gate Symbol Group -->
+                                <g id="gate-symbol-group"></g>
+
+                                <!-- Interactive Switch Node A -->
+                                <g transform="translate(15, 40)" class="cursor-pointer group" onclick="toggleInput('A')">
+                                    <rect x="0" y="0" width="50" height="40" rx="8" fill="#1e293b" stroke="#334155" stroke-width="2" class="group-hover:stroke-blue-400 transition"/>
+                                    <text id="svg-text-a" x="25" y="25" text-anchor="middle" fill="#f3f4f6" font-size="18" font-weight="bold" class="code-font">0</text>
+                                    <text x="25" y="-8" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="bold">INPUT A</text>
+                                </g>
+
+                                <!-- Interactive Switch Node B -->
+                                <g id="svg-group-b" transform="translate(15, 120)" class="cursor-pointer group" onclick="toggleInput('B')">
+                                    <rect x="0" y="0" width="50" height="40" rx="8" fill="#1e293b" stroke="#334155" stroke-width="2" class="group-hover:stroke-blue-400 transition"/>
+                                    <text id="svg-text-b" x="25" y="25" text-anchor="middle" fill="#f3f4f6" font-size="18" font-weight="bold" class="code-font">0</text>
+                                    <text x="25" y="-8" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="bold">INPUT B</text>
+                                </g>
+
+                                <!-- Output Indicator Bulb -->
+                                <g transform="translate(415, 76)">
+                                    <circle id="svg-out-bulb" cx="24" cy="24" r="22" fill="#1e293b" stroke="#334155" stroke-width="3"/>
+                                    <text id="svg-text-out" x="24" y="30" text-anchor="middle" fill="#94a3b8" font-size="18" font-weight="bold" class="code-font">0</text>
+                                    <text x="24" y="60" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="bold">OUTPUT (Y)</text>
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Input Toggle Control Buttons -->
+                    <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800">
+                            <span class="text-xs font-semibold text-slate-300">Input A Switch</span>
+                            <div class="flex gap-2">
+                                <button onclick="setInput('A', 0)" id="btn-a-0" class="px-3.5 py-1.5 rounded-lg text-xs font-bold code-font bg-blue-600 text-white">0 (LOW)</button>
+                                <button onclick="setInput('A', 1)" id="btn-a-1" class="px-3.5 py-1.5 rounded-lg text-xs font-bold code-font bg-slate-800 text-slate-400 hover:bg-slate-700">1 (HIGH)</button>
+                            </div>
+                        </div>
+                        <div id="control-group-b" class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800">
+                            <span class="text-xs font-semibold text-slate-300">Input B Switch</span>
+                            <div class="flex gap-2">
+                                <button onclick="setInput('B', 0)" id="btn-b-0" class="px-3.5 py-1.5 rounded-lg text-xs font-bold code-font bg-blue-600 text-white">0 (LOW)</button>
+                                <button onclick="setInput('B', 1)" id="btn-b-1" class="px-3.5 py-1.5 rounded-lg text-xs font-bold code-font bg-slate-800 text-slate-400 hover:bg-slate-700">1 (HIGH)</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                            <h3 id="gate-info-title" class="font-bold text-lg text-cyan-400">AND Gate</h3>
+                            <span id="gate-boolean-expr" class="code-font text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-md border border-slate-700">A · B</span>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
+                                <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">Current State Evaluation</p>
+                                <div id="gate-eval-display" class="code-font text-base font-bold text-emerald-400">
+                                    0 AND 0 = 0
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800/50">
+                                <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">Fundamental Rule</p>
+                                <p id="gate-rule-desc" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                                    Output is <span class="text-emerald-400 font-semibold">1</span> only when BOTH inputs are 1.
+                                </p>
+                            </div>
+
+                            <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800/50">
+                                <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">Real-World AI / Compute Analogy</p>
+                                <p id="gate-analogy-desc" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                                    Acts like a strict safety check: ALL prerequisites must be met for activation.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-800 text-xs text-slate-500 flex items-center gap-2">
+                        <i class="fa-solid fa-lightbulb text-amber-400"></i>
+                        <span>Click switches or gate buttons to update circuit logic live.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="truthtable" class="scroll-mt-20">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="flex items-center justify-center w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 font-bold border border-cyan-500/30 text-sm">2</span>
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Truth Table Generator</h2>
+                    <p class="text-sm text-slate-400">Examine full truth tables with dynamic row highlighting linked to your active input switches.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Selected Gate Truth Table -->
+                <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-white flex items-center gap-2 text-sm sm:text-base">
+                            <i class="fa-solid fa-table text-cyan-400"></i> Active Gate Truth Table (<span id="tt-gate-name" class="text-cyan-400">AND</span>)
+                        </h3>
+                        <span class="text-xs text-slate-400">Highlighted = Current State</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-950 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+                                    <th class="py-3 px-4">Input A</th>
+                                    <th id="tt-th-b" class="py-3 px-4">Input B</th>
+                                    <th class="py-3 px-4">Output (Y)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="active-truth-table-body" class="code-font text-sm divide-y divide-slate-800/50">
+                                <!-- Generated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-white flex items-center gap-2 text-sm sm:text-base">
+                            <i class="fa-solid fa-layer-group text-blue-400"></i> Complete Gate Matrix
+                        </h3>
+                        <span class="text-xs text-slate-400">2-Input Combinations</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-center border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                                    <th class="py-2.5 px-2">A</th>
+                                    <th class="py-2.5 px-2 border-r border-slate-800">B</th>
+                                    <th class="py-2.5 px-2 text-blue-400 font-bold">AND</th>
+                                    <th class="py-2.5 px-2 text-cyan-400 font-bold">OR</th>
+                                    <th class="py-2.5 px-2 text-rose-400 font-bold">NAND</th>
+                                    <th class="py-2.5 px-2 text-amber-400 font-bold">NOR</th>
+                                    <th class="py-2.5 px-2 text-purple-400 font-bold">XOR</th>
+                                    <th class="py-2.5 px-2 text-emerald-400 font-bold">XNOR</th>
+                                </tr>
+                            </thead>
+                            <tbody id="matrix-truth-table-body" class="code-font divide-y divide-slate-800/50">
+                                <tr id="matrix-row-00" class="hover:bg-slate-800/50 transition">
+                                    <td class="py-2.5 px-2">0</td>
+                                    <td class="py-2.5 px-2 border-r border-slate-800">0</td>
+                                    <td class="py-2.5 px-2 text-slate-400">0</td>
+                                    <td class="py-2.5 px-2 text-slate-400">0</td>
+                                    <td class="py-2.5 px-2 text-emerald-400 font-bold">1</td>
+                                    <td class="py-2.5 px-2 text-emerald-400 font-bold">1</td>
+                                    <td class="py-2.5 px-2 text-slate-400">0</td>
+                                    <td class="py-2.5 px-2 text-emerald-400 font-bold">1</td>
+                                </tr>
+                                <tr id="matrix-row-01" class="hover:bg-slate-800/50 transition">
+                                    <td class="py-2.5 px-2">0</td>
+                                    <td class="py-2.5 px-2 border-r border-slate-800">1</td>
+                                    <td class="py-2.5 px-2 text-slate-400">0</td>
+                                    <td class="py-2.5 px-2 text-emerald-400 font-bold">1</td>
+                                    <td class="py-2.5 px-2 text-emerald-400 font-bold">1</td>
+                                    <td class="py-2.5 px-2 text-slate-400">0</td>
+                                    <td class="py-2.5 px-2 text-emerald-400 font-bold">1</td>
+                                    <td class="py-2.5 px-2 text-slate-400">0</td>
+                                </tr>
+                                <tr id="matrix-row-10" class="hover:bg-slate-800/50 transition">
+                                    <td class="py-2.5 px-2">1</td>
+                                    <td class="py-2.5 px-2 border-r border-slate-800">0</td>
+                                    <td class="py-2.5 px-2 text-slate-400">0</td>
+                                    <td class="py-2.5 px-2 text-emerald-400 font-bold">1</td>
+                                    <td class="py-2.5 px-2 text-emerald-400 font-bold">1</td>
+                                    <td class="py-2.5 px-2 text-slate-400">0</td>
+                                    <td class="py-2.5 px-2 text-emerald-400 font-bold">1</td>
+                                    <td class="py-2.5 px-2 text-slate-400">0</td>
+                                </tr>
+                                <tr id="matrix-row-11" class="hover:bg-slate-800/50 transition">
+                                    <td class="py-2.5 px-2">1</td>
+                                    <td class="py-2.5 px-2 border-r border-slate-800">1</td>
+                                    <td class="py-2.5 px-2 text-emerald-400 font-bold">1</td>
+                                    <td class="py-2.5 px-2 text-emerald-400 font-bold">1</td>
+                                    <td class="py-2.5 px-2 text-slate-400">0</td>
+                                    <td class="py-2.5 px-2 text-slate-400">0</td>
+                                    <td class="py-2.5 px-2 text-slate-400">0</td>
+                                    <td class="py-2.5 px-2 text-emerald-400 font-bold">1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="universal" class="scroll-mt-20">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30 text-sm">3</span>
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Universal Gates Architecture</h2>
+                    <p class="text-sm text-slate-400">Discover why <strong>NAND</strong> and <strong>NOR</strong> are called "Universal Gates" capable of constructing any modern computer CPU processor or memory unit.</p>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+                <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs text-slate-400 font-semibold mr-2">Target Logic Gate:</span>
+                        <button onclick="setUniversalTarget('NOT')" id="univ-target-NOT" class="univ-target-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-emerald-600 text-white">Synthesize NOT</button>
+                        <button onclick="setUniversalTarget('AND')" id="univ-target-AND" class="univ-target-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-400 hover:text-white">Synthesize AND</button>
+                        <button onclick="setUniversalTarget('OR')" id="univ-target-OR" class="univ-target-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-400 hover:text-white">Synthesize OR</button>
+                        <button onclick="setUniversalTarget('XOR')" id="univ-target-XOR" class="univ-target-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-400 hover:text-white">Synthesize XOR</button>
+                    </div>
+                    <div class="text-xs bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 text-emerald-400 font-semibold">
+                        NAND Gate Count: <span id="univ-gate-count" class="code-font font-bold">1</span>
+                    </div>
+                </div>
+
+                <!-- Dynamic Universal Schematic Canvas -->
+                <div class="bg-slate-950 rounded-xl p-6 border border-slate-800/80 min-h-[220px] flex flex-col items-center justify-center">
+                    <svg id="univ-circuit-svg" class="w-full h-48 max-w-2xl" viewBox="0 0 600 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Universal SVG generated via JS -->
+                    </svg>
+                </div>
+
+                <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    <i class="fa-solid fa-microchip text-emerald-400 mr-2"></i>
+                    <span id="univ-explanation-text">
+                        A NOT gate is built using a single NAND gate by tying both inputs together: NOT(A) = A NAND A.
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <section id="xor-problem" class="scroll-mt-20">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="flex items-center justify-center w-8 h-8 rounded-full bg-rose-500/20 text-rose-400 font-bold border border-rose-500/30 text-sm">4</span>
+                <div>
+                    <h2 class="text-2xl font-bold text-white">The XOR Problem & Linear Non-Separability</h2>
+                    <p class="text-sm text-slate-400">In 1969, Minsky & Papert proved that a single-layer perceptron cannot learn an XOR function, triggering the first "AI Winter".</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- 2D Coordinate Decision Boundary Canvas -->
+                <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col items-center">
+                    <div class="w-full flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-white text-sm sm:text-base flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-rose-400"></i> 2D Binary Input Space Plot
+                        </h3>
+                        <div class="flex gap-2">
+                            <button onclick="setXorDemoGate('AND')" id="xor-demo-AND" class="xor-demo-btn px-2.5 py-1 rounded text-xs font-bold transition bg-slate-800 text-slate-300">AND</button>
+                            <button onclick="setXorDemoGate('OR')" id="xor-demo-OR" class="xor-demo-btn px-2.5 py-1 rounded text-xs font-bold transition bg-slate-800 text-slate-300">OR</button>
+                            <button onclick="setXorDemoGate('XOR')" id="xor-demo-XOR" class="xor-demo-btn px-2.5 py-1 rounded text-xs font-bold transition bg-rose-600 text-white shadow">XOR</button>
+                        </div>
+                    </div>
+
+                    <div class="relative w-full max-w-xs sm:max-w-md aspect-square bg-slate-950 rounded-xl border border-slate-800 p-2 flex items-center justify-center">
+                        <canvas id="xor-canvas" width="360" height="360" class="w-full h-full rounded-lg"></canvas>
+                    </div>
+
+                    <p class="text-xs text-slate-400 mt-3 text-center">
+                        Dots represent inputs: <span class="text-emerald-400 font-bold">● Output 1</span> | <span class="text-rose-400 font-bold">● Output 0</span>
+                    </p>
+                </div>
+
+                <!-- Theoretical Explanation & Breakthrough -->
+                <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="border-b border-slate-800 pb-3">
+                            <h3 class="font-bold text-white text-lg text-rose-400">Why Single Neurons Fail at XOR</h3>
+                            <p class="text-xs text-slate-400 mt-1">Mathematical proof of linear decision boundaries.</p>
+                        </div>
+
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs sm:text-sm text-slate-300 space-y-3">
+                            <p>
+                                A single artificial neuron computes a linear decision boundary equation:
+                            </p>
+                            <div class="code-font text-center bg-slate-900 py-2 rounded-lg text-cyan-300 font-bold text-sm">
+                                w₁ · x₁ + w₂ · x₂ + b = 0
+                            </div>
+                            <p>
+                                For <strong>AND</strong> or <strong>OR</strong> gates, a single straight line easily divides the 1s from the 0s.
+                            </p>
+                            <p id="xor-theory-text" class="text-rose-300 font-medium border-l-2 border-rose-500 pl-3">
+                                For <strong>XOR</strong>, the output 1s are at (0,1) and (1,0), while 0s are at (0,0) and (1,1). It is geometrically impossible for any single straight line to separate these diagonal points!
+                            </p>
+                        </div>
+
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-xs text-slate-300">
+                            <h4 class="font-bold text-purple-400 mb-1 flex items-center gap-1">
+                                <i class="fa-solid fa-sitemap"></i> The Solution: Multi-Layer Perceptrons (MLPs)
+                            </h4>
+                            <p>
+                                By adding a hidden layer with non-linear activation functions (or combining NAND + OR through an AND gate), neural networks construct curved or multiple decision lines to solve XOR!
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-800 text-xs text-slate-500">
+                        <i class="fa-solid fa-book-bookmark text-rose-400 mr-1"></i> Minsky & Papert (1969) "Perceptrons"
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="perceptron" class="scroll-mt-20">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 font-bold border border-purple-500/30 text-sm">5</span>
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Interactive Neural Perceptron Lab</h2>
+                    <p class="text-sm text-slate-400">Train a single McCulloch-Pitts / Rosenblatt neuron live on boolean gate data. Watch weights adjust epoch by epoch!</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Perceptron Controls & Training Engine -->
+                <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+                    <!-- Config Header -->
+                    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                        <div>
+                            <span class="text-xs text-slate-400 font-semibold block">Target Function to Learn</span>
+                            <div class="flex gap-2 mt-1">
+                                <button onclick="setPerceptronGate('AND')" id="p-gate-AND" class="p-gate-btn px-3 py-1 rounded-lg text-xs font-bold transition bg-purple-600 text-white">AND</button>
+                                <button onclick="setPerceptronGate('OR')" id="p-gate-OR" class="p-gate-btn px-3 py-1 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-400">OR</button>
+                                <button onclick="setPerceptronGate('NAND')" id="p-gate-NAND" class="p-gate-btn px-3 py-1 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-400">NAND</button>
+                                <button onclick="setPerceptronGate('XOR')" id="p-gate-XOR" class="p-gate-btn px-3 py-1 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-400">XOR (Fails!)</button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button onclick="trainPerceptronStep()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-purple-300 font-bold text-xs rounded-xl border border-purple-500/30 transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-forward-step"></i> Step Epoch
+                            </button>
+                            <button onclick="toggleAutoTrain()" id="auto-train-btn" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-purple-600/30 flex items-center gap-1.5">
+                                <i class="fa-solid fa-play" id="auto-train-icon"></i> Auto Train
+                            </button>
+                            <button onclick="resetPerceptronWeights()" class="px-3 py-2 bg-slate-950 hover:bg-slate-800 text-slate-400 text-xs rounded-xl border border-slate-800 transition">
+                                <i class="fa-solid fa-rotate-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Perceptron Mathematical Diagram SVG -->
+                    <div class="bg-slate-950 rounded-xl p-4 border border-slate-800 flex justify-center overflow-x-auto">
+                        <svg class="w-full h-44 max-w-md" viewBox="0 0 400 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Input Nodes -->
+                            <circle cx="50" cy="40" r="18" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+                            <text x="50" y="44" text-anchor="middle" fill="#93c5fd" font-size="12" font-weight="bold" class="code-font">x₁</text>
+
+                            <circle cx="50" cy="120" r="18" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+                            <text x="50" y="124" text-anchor="middle" fill="#93c5fd" font-size="12" font-weight="bold" class="code-font">x₂</text>
+
+                            <!-- Summation Node -->
+                            <circle cx="200" cy="80" r="28" fill="#1e293b" stroke="#a855f7" stroke-width="3"/>
+                            <text x="200" y="84" text-anchor="middle" fill="#e9d5ff" font-size="16" font-weight="bold" class="code-font">Σ</text>
+
+                            <!-- Activation Function Node -->
+                            <circle cx="310" cy="80" r="22" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+                            <text x="310" y="84" text-anchor="middle" fill="#6ee7b7" font-size="13" font-weight="bold" class="code-font">f(z)</text>
+
+                            <!-- Synapses & Weights -->
+                            <line x1="68" y1="40" x2="172" y2="70" stroke="#a855f7" stroke-width="2"/>
+                            <text id="svg-w1-val" x="110" y="46" text-anchor="middle" fill="#c084fc" font-size="11" font-weight="bold" class="code-font">w₁=0.50</text>
+
+                            <line x1="68" y1="120" x2="172" y2="90" stroke="#a855f7" stroke-width="2"/>
+                            <text id="svg-w2-val" x="110" y="120" text-anchor="middle" fill="#c084fc" font-size="11" font-weight="bold" class="code-font">w₂=-0.20</text>
+
+                            <!-- Bias Input -->
+                            <line x1="200" y1="20" x2="200" y2="52" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4"/>
+                            <text id="svg-b-val" x="200" y="14" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="bold" class="code-font">b=-0.30</text>
+
+                            <!-- Output Line -->
+                            <line x1="228" y1="80" x2="288" y2="80" stroke="#94a3b8" stroke-width="2"/>
+                            <line x1="332" y1="80" x2="380" y2="80" stroke="#10b981" stroke-width="3"/>
+                            <text x="382" y="84" fill="#6ee7b7" font-size="14" font-weight="bold" class="code-font">y</text>
+                        </svg>
+                    </div>
+
+                    <!-- Manual Weight & Bias Sliders -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <span class="text-purple-300">Weight 1 (w₁)</span>
+                                <span id="slider-w1-label" class="code-font text-white">0.50</span>
+                            </div>
+                            <input type="range" min="-2" max="2" step="0.05" value="0.5" id="slider-w1" oninput="updatePerceptronManual()" class="w-full accent-purple-500 cursor-pointer">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <span class="text-purple-300">Weight 2 (w₂)</span>
+                                <span id="slider-w2-label" class="code-font text-white">-0.20</span>
+                            </div>
+                            <input type="range" min="-2" max="2" step="0.05" value="-0.2" id="slider-w2" oninput="updatePerceptronManual()" class="w-full accent-purple-500 cursor-pointer">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <span class="text-amber-300">Bias (b)</span>
+                                <span id="slider-b-label" class="code-font text-white">-0.30</span>
+                            </div>
+                            <input type="range" min="-2" max="2" step="0.05" value="-0.3" id="slider-b" oninput="updatePerceptronManual()" class="w-full accent-amber-500 cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+                            <h3 class="font-bold text-white text-sm sm:text-base flex items-center gap-2">
+                                <i class="fa-solid fa-sliders text-purple-400"></i> Training Monitor
+                            </h3>
+                            <span id="p-status-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                                Epoch: <span id="p-epoch-count">0</span>
+                            </span>
+                        </div>
+
+                        <!-- Prediction Matrix Table for 4 Truth Rows -->
+                        <div class="overflow-x-auto mb-4">
+                            <table class="w-full text-center border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-950 text-slate-400 border-b border-slate-800 uppercase">
+                                        <th class="py-2 px-1">x₁</th>
+                                        <th class="py-2 px-1">x₂</th>
+                                        <th class="py-2 px-1 text-slate-300">Target</th>
+                                        <th class="py-2 px-1 text-purple-400">Predicted</th>
+                                        <th class="py-2 px-1 text-slate-300">Error</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="perceptron-eval-rows" class="code-font divide-y divide-slate-800/50">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Total Error metric box -->
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+                            <div>
+                                <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold block">Total Loss / Classification Errors</span>
+                                <span id="p-total-error" class="text-2xl font-extrabold code-font text-rose-400">4 / 4 Errors</span>
+                            </div>
+                            <div id="p-convergence-icon" class="text-3xl text-rose-500">
+                                <i class="fa-solid fa-circle-xmark"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800 text-xs text-slate-300 leading-relaxed">
+                        <span class="font-bold text-purple-400 block mb-1">Perceptron Learning Rule (Rosenblatt, 1957)</span>
+                        <p class="code-font text-slate-400 text-[11px] mb-1">wᵢ ← wᵢ + α · (target - predicted) · xᵢ</p>
+                        <p>When target matches prediction, error is 0 and weights remain unchanged. If predictions differ, weights shift proportionally to reduce error.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="timeline" class="scroll-mt-20">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="flex items-center justify-center w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30 text-sm">6</span>
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Historical AI & Compute Evolution</h2>
+                    <p class="text-sm text-slate-400">Trace the historic leap from 19th-century logic gates to modern Transformer Large Language Models.</p>
+                </div>
+            </div>
+
+            <div class="relative border-l-2 border-slate-800 ml-4 sm:ml-8 pl-6 sm:pl-8 space-y-10">
+                <!-- Timeline Item 1 -->
+                <div class="relative group">
+                    <div class="absolute -left-[31px] sm:-left-[39px] top-1.5 w-4 h-4 rounded-full bg-blue-500 border-4 border-navy-900 group-hover:scale-125 transition"></div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold code-font px-2.5 py-1 bg-blue-500/20 text-blue-400 rounded-md border border-blue-500/30">1854</span>
+                            <span class="text-xs text-slate-500">George Boole</span>
+                        </div>
+                        <h3 class="font-bold text-white text-base sm:text-lg">Boolean Algebra</h3>
+                        <p class="text-xs sm:text-sm text-slate-300 mt-1">
+                            Published <em>"The Laws of Thought"</em>, formalizing binary logic (1s and 0s) as mathematical operations (AND, OR, NOT).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Timeline Item 2 -->
+                <div class="relative group">
+                    <div class="absolute -left-[31px] sm:-left-[39px] top-1.5 w-4 h-4 rounded-full bg-cyan-500 border-4 border-navy-900 group-hover:scale-125 transition"></div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold code-font px-2.5 py-1 bg-cyan-500/20 text-cyan-400 rounded-md border border-cyan-500/30">1943</span>
+                            <span class="text-xs text-slate-500">McCulloch & Pitts</span>
+                        </div>
+                        <h3 class="font-bold text-white text-base sm:text-lg">First Artificial Neuron Model</h3>
+                        <p class="text-xs sm:text-sm text-slate-300 mt-1">
+                            Showed that simplified mathematical neuron models could calculate any logical function (AND, OR, NOT), linking biological brain theory to computer science.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Timeline Item 3 -->
+                <div class="relative group">
+                    <div class="absolute -left-[31px] sm:-left-[39px] top-1.5 w-4 h-4 rounded-full bg-purple-500 border-4 border-navy-900 group-hover:scale-125 transition"></div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold code-font px-2.5 py-1 bg-purple-500/20 text-purple-400 rounded-md border border-purple-500/30">1957</span>
+                            <span class="text-xs text-slate-500">Frank Rosenblatt</span>
+                        </div>
+                        <h3 class="font-bold text-white text-base sm:text-lg">The Rosenblatt Perceptron</h3>
+                        <p class="text-xs sm:text-sm text-slate-300 mt-1">
+                            Built the Mark I Perceptron machine—the first neural model that learned custom weights from raw data via iterative feedback!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Timeline Item 4 -->
+                <div class="relative group">
+                    <div class="absolute -left-[31px] sm:-left-[39px] top-1.5 w-4 h-4 rounded-full bg-rose-500 border-4 border-navy-900 group-hover:scale-125 transition"></div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg border-l-4 border-l-rose-500">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold code-font px-2.5 py-1 bg-rose-500/20 text-rose-400 rounded-md border border-rose-500/30">1969</span>
+                            <span class="text-xs text-slate-500">Minsky & Papert</span>
+                        </div>
+                        <h3 class="font-bold text-white text-base sm:text-lg">The XOR Crisis & First AI Winter</h3>
+                        <p class="text-xs sm:text-sm text-slate-300 mt-1">
+                            Proved single-layer perceptrons could not compute non-linearly separable functions like XOR, causing neural network funding to collapse for over a decade.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Timeline Item 5 -->
+                <div class="relative group">
+                    <div class="absolute -left-[31px] sm:-left-[39px] top-1.5 w-4 h-4 rounded-full bg-emerald-500 border-4 border-navy-900 group-hover:scale-125 transition"></div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold code-font px-2.5 py-1 bg-emerald-500/20 text-emerald-400 rounded-md border border-emerald-500/30">1986</span>
+                            <span class="text-xs text-slate-500">Rumelhart, Hinton, Williams</span>
+                        </div>
+                        <h3 class="font-bold text-white text-base sm:text-lg">Backpropagation Breakthrough</h3>
+                        <p class="text-xs sm:text-sm text-slate-300 mt-1">
+                            Popularized the backpropagation algorithm, enabling Multi-Layer Neural Networks (MLPs) to learn complex non-linear representations and overcome the XOR barrier permanently.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Timeline Item 6 -->
+                <div class="relative group">
+                    <div class="absolute -left-[31px] sm:-left-[39px] top-1.5 w-4 h-4 rounded-full bg-amber-500 border-4 border-navy-900 group-hover:scale-125 transition"></div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold code-font px-2.5 py-1 bg-amber-500/20 text-amber-400 rounded-md border border-amber-500/30">2017 - Present</span>
+                            <span class="text-xs text-slate-500">Modern Deep Learning</span>
+                        </div>
+                        <h3 class="font-bold text-white text-base sm:text-lg">Transformers & Billions of Perceptron Parameters</h3>
+                        <p class="text-xs sm:text-sm text-slate-300 mt-1">
+                            Today's Large Language Models (LLMs) connect hundreds of billions of digital neurons (MLPs + Attention layers), built upon the foundational boolean and linear principles you just tested!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="aitutor" class="scroll-mt-20">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="flex items-center justify-center w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 font-bold border border-cyan-500/30 text-sm">
+                    <i class="fa-solid fa-sparkles"></i>
+                </span>
+                <div>
+                    <h2 class="text-2xl font-bold text-white">AI Lab Assistant & Quiz</h2>
+                    <p class="text-sm text-slate-400">Ask questions to our Gemini-powered AI Tutor or test your knowledge with interactive quick challenges.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- AI Q&A Chat Box -->
+                <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between h-[420px]">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+                            <div class="flex items-center gap-2">
+                                <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></div>
+                                <h3 class="font-bold text-white text-sm sm:text-base">Gemini Logic & Neural AI Tutor</h3>
+                            </div>
+                            <span class="text-[11px] text-slate-400">Powered by Gemini 3 Flash</span>
+                        </div>
+
+                        <div id="ai-chat-output" class="bg-slate-950 p-4 rounded-xl border border-slate-800 h-[260px] overflow-y-auto space-y-3 text-xs sm:text-sm text-slate-300">
+                            <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 text-cyan-300">
+                                👋 Hello! I am your AI Lab Assistant. Ask me anything about logic gates, boolean algebra, universal NAND circuits, or why perceptrons struggled with XOR!
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 mt-3">
+                        <input type="text" id="ai-user-input" placeholder="Ask e.g. Why is NAND considered universal?" onkeydown="if(event.key==='Enter') askAiTutor()" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-cyan-500 transition">
+                        <button onclick="askAiTutor()" id="ai-send-btn" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:opacity-90 text-white font-bold text-xs rounded-xl transition shadow-md shadow-cyan-500/20 flex items-center gap-1.5">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Self Assessment Quiz Card -->
+                <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                            <h3 class="font-bold text-white text-sm sm:text-base flex items-center gap-2">
+                                <i class="fa-solid fa-circle-question text-amber-400"></i> Knowledge Check
+                            </h3>
+                            <span class="text-xs text-slate-400">Question <span id="quiz-idx">1</span>/3</span>
+                        </div>
+
+                        <div class="space-y-4">
+                            <p id="quiz-question-text" class="text-xs sm:text-sm text-white font-semibold">
+                                Which logic gate outputs 1 only when BOTH inputs are 1?
+                            </p>
+
+                            <div id="quiz-options-container" class="space-y-2">
+                                <!-- Options dynamically rendered -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="quiz-feedback" class="mt-4 p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs hidden">
+                        <!-- Feedback dynamically updated -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-20 border-t border-slate-800 py-8 bg-navy-950 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>From Logic Gates to Artificial Intelligence • Interactive Computer Science & Neural Learning Lab</p>
+            <p class="mt-2 text-slate-600">Built for interactive exploration of digital hardware and deep learning foundations.</p>
+        </div>
+    </footer>
+
+    <script>
+        /* ==========================================================================
+           AUDIO SYNTHESIZER (Web Audio API)
+           ========================================================================== */
+        let soundEnabled = false;
+        let audioCtx = null;
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('audio-toggle-btn');
+            const icon = document.getElementById('audio-icon');
+            const label = document.getElementById('audio-label');
+
+            if (soundEnabled) {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                icon.className = 'fa-solid fa-volume-high text-emerald-400';
+                label.textContent = 'Sound ON';
+                btn.classList.add('border-emerald-500/50');
+                playTone(523.25, 0.1, 'sine'); // C5 pop
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-400';
+                label.textContent = 'Sound OFF';
+                btn.classList.remove('border-emerald-500/50');
+            }
+        }
+
+        function playTone(freq, duration = 0.08, type = 'sine') {
+            if (!soundEnabled || !audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        /* ==========================================================================
+           SECTION 1: LOGIC GATE LAB ENGINE
+           ========================================================================== */
+        let activeGate = 'AND';
+        let inputA = 0;
+        let inputB = 0;
+
+        const GATE_CONFIGS = {
+            'AND': {
+                eval: (a, b) => a & b,
+                expr: 'A · B',
+                rule: 'Output is 1 ONLY when BOTH Input A and Input B are 1.',
+                analogy: 'Acts like a strict security gate: ALL permissions must be granted to pass.',
+                singleInput: false
+            },
+            'OR': {
+                eval: (a, b) => a | b,
+                expr: 'A + B',
+                rule: 'Output is 1 if AT LEAST ONE input is 1.',
+                analogy: 'Acts like parallel power paths: EITHER switch completes the circuit.',
+                singleInput: false
+            },
+            'NOT': {
+                eval: (a, b) => a === 0 ? 1 : 0,
+                expr: 'A\' (Invert)',
+                rule: 'Inverts the single input signal (0 becomes 1, 1 becomes 0).',
+                analogy: 'Acts like an inverter switch or logical negation.',
+                singleInput: true
+            },
+            'NAND': {
+                eval: (a, b) => (a & b) === 1 ? 0 : 1,
+                expr: '(A · B)\'',
+                rule: 'Output is 0 ONLY when BOTH inputs are 1. Opposite of AND.',
+                analogy: 'Universal building block: Can construct any boolean function.',
+                singleInput: false
+            },
+            'NOR': {
+                eval: (a, b) => (a | b) === 1 ? 0 : 1,
+                expr: '(A + B)\'',
+                rule: 'Output is 1 ONLY when BOTH inputs are 0. Opposite of OR.',
+                analogy: 'Universal building block: Used extensively in NOR Flash memories.',
+                singleInput: false
+            },
+            'XOR': {
+                eval: (a, b) => a ^ b,
+                expr: 'A ⊕ B',
+                rule: 'Output is 1 when inputs are DIFFERENT (one is 1, one is 0).',
+                analogy: 'Parity checker & Binary Addition: Used in Half Adders to sum bits.',
+                singleInput: false
+            },
+            'XNOR': {
+                eval: (a, b) => (a ^ b) === 1 ? 0 : 1,
+                expr: '(A ⊕ B)\'',
+                rule: 'Output is 1 when inputs are IDENTICAL (both 0 or both 1).',
+                analogy: 'Equality comparator: Validates if two data bits match.',
+                singleInput: false
+            }
+        };
+
+        function selectGate(gateName) {
+            activeGate = gateName;
+            playTone(440, 0.06, 'triangle');
+
+            // Update Gate Selector Buttons UI
+            document.querySelectorAll('.gate-selector-btn').forEach(btn => {
+                btn.className = 'gate-selector-btn px-4 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white';
+            });
+            const activeBtn = document.getElementById(`gate-btn-${gateName}`);
+            if (activeBtn) {
+                activeBtn.className = 'gate-selector-btn px-4 py-2 rounded-lg text-xs font-bold transition bg-blue-600 text-white shadow';
+            }
+
+            // Toggle Input B visibility for NOT gate
+            const isSingle = GATE_CONFIGS[gateName].singleInput;
+            document.getElementById('wire-b').style.display = isSingle ? 'none' : 'block';
+            document.getElementById('svg-group-b').style.display = isSingle ? 'none' : 'block';
+            document.getElementById('control-group-b').style.display = isSingle ? 'none' : 'flex';
+            document.getElementById('tt-th-b').style.display = isSingle ? 'none' : 'table-cell';
+
+            updateCircuit();
+        }
+
+        function toggleInput(inputKey) {
+            if (inputKey === 'A') {
+                inputA = inputA === 0 ? 1 : 0;
+            } else {
+                inputB = inputB === 0 ? 1 : 0;
+            }
+            playTone(inputKey === 'A' ? 600 : 700, 0.05, 'sine');
+            updateCircuit();
+        }
+
+        function setInput(inputKey, val) {
+            if (inputKey === 'A') inputA = val;
+            else inputB = val;
+            playTone(val === 1 ? 650 : 350, 0.05, 'sine');
+            updateCircuit();
+        }
+
+        function updateCircuit() {
+            const config = GATE_CONFIGS[activeGate];
+            const outputVal = config.singleInput ? config.eval(inputA) : config.eval(inputA, inputB);
+
+            // Update SVG Switch Labels
+            document.getElementById('svg-text-a').textContent = inputA;
+            document.getElementById('svg-text-b').textContent = inputB;
+            document.getElementById('svg-text-out').textContent = outputVal;
+
+            // Update Input Button Styling
+            document.getElementById('btn-a-0').className = inputA === 0 ? 'px-3.5 py-1.5 rounded-lg text-xs font-bold code-font bg-blue-600 text-white' : 'px-3.5 py-1.5 rounded-lg text-xs font-bold code-font bg-slate-800 text-slate-400 hover:bg-slate-700';
+            document.getElementById('btn-a-1').className = inputA === 1 ? 'px-3.5 py-1.5 rounded-lg text-xs font-bold code-font bg-blue-600 text-white' : 'px-3.5 py-1.5 rounded-lg text-xs font-bold code-font bg-slate-800 text-slate-400 hover:bg-slate-700';
+            document.getElementById('btn-b-0').className = inputB === 0 ? 'px-3.5 py-1.5 rounded-lg text-xs font-bold code-font bg-blue-600 text-white' : 'px-3.5 py-1.5 rounded-lg text-xs font-bold code-font bg-slate-800 text-slate-400 hover:bg-slate-700';
+            document.getElementById('btn-b-1').className = inputB === 1 ? 'px-3.5 py-1.5 rounded-lg text-xs font-bold code-font bg-blue-600 text-white' : 'px-3.5 py-1.5 rounded-lg text-xs font-bold code-font bg-slate-800 text-slate-400 hover:bg-slate-700';
+
+            // Wires visual styling
+            document.getElementById('wire-a').setAttribute('class', inputA === 1 ? 'wire-active' : 'wire-inactive');
+            document.getElementById('wire-b').setAttribute('class', inputB === 1 ? 'wire-active' : 'wire-inactive');
+            document.getElementById('wire-out').setAttribute('class', outputVal === 1 ? 'wire-active' : 'wire-inactive');
+
+            // Output Bulb Glowing
+            const bulb = document.getElementById('svg-out-bulb');
+            const textOut = document.getElementById('svg-text-out');
+            if (outputVal === 1) {
+                bulb.setAttribute('fill', '#10b981');
+                bulb.setAttribute('stroke', '#34d399');
+                bulb.setAttribute('class', 'pulse-glow');
+                textOut.setAttribute('fill', '#ffffff');
+            } else {
+                bulb.setAttribute('fill', '#1e293b');
+                bulb.setAttribute('stroke', '#334155');
+                bulb.removeAttribute('class');
+                textOut.setAttribute('fill', '#94a3b8');
+            }
+
+            // Draw IEEE Standard Gate Geometry in SVG
+            renderGateSymbolSVG(activeGate);
+
+            // Update Side Explanation Panel
+            document.getElementById('gate-info-title').textContent = `${activeGate} Gate`;
+            document.getElementById('gate-boolean-expr').textContent = config.expr;
+            document.getElementById('gate-eval-display').textContent = config.singleInput ?
+                `NOT ${inputA} = ${outputVal}` : `${inputA} ${activeGate} ${inputB} = ${outputVal}`;
+            document.getElementById('gate-rule-desc').innerHTML = config.rule;
+            document.getElementById('gate-analogy-desc').textContent = config.analogy;
+
+            // Sync Truth Tables
+            renderActiveTruthTable();
+            highlightMatrixRow();
+        }
+
+        function renderGateSymbolSVG(gate) {
+            const group = document.getElementById('gate-symbol-group');
+            let pathHtml = '';
+
+            switch(gate) {
+                case 'AND':
+                    pathHtml = `<path d="M 190 50 L 230 50 C 270 50, 270 150, 230 150 L 190 150 Z" fill="#0f172a" stroke="#3b82f6" stroke-width="4"/>`;
+                    break;
+                case 'OR':
+                    pathHtml = `<path d="M 190 50 C 220 50, 240 70, 280 100 C 240 130, 220 150, 190 150 C 210 120, 210 80, 190 50 Z" fill="#0f172a" stroke="#06b6d4" stroke-width="4"/>`;
+                    break;
+                case 'NOT':
+                    pathHtml = `<path d="M 190 50 L 260 100 L 190 150 Z" fill="#0f172a" stroke="#a855f7" stroke-width="4"/>
+                                <circle cx="272" cy="100" r="10" fill="#0f172a" stroke="#a855f7" stroke-width="3"/>`;
+                    break;
+                case 'NAND':
+                    pathHtml = `<path d="M 190 50 L 230 50 C 270 50, 270 150, 230 150 L 190 150 Z" fill="#0f172a" stroke="#f43f5e" stroke-width="4"/>
+                                <circle cx="282" cy="100" r="10" fill="#0f172a" stroke="#f43f5e" stroke-width="3"/>`;
+                    break;
+                case 'NOR':
+                    pathHtml = `<path d="M 190 50 C 220 50, 240 70, 270 100 C 240 130, 220 150, 190 150 C 210 120, 210 80, 190 50 Z" fill="#0f172a" stroke="#f59e0b" stroke-width="4"/>
+                                <circle cx="282" cy="100" r="10" fill="#0f172a" stroke="#f59e0b" stroke-width="3"/>`;
+                    break;
+                case 'XOR':
+                    pathHtml = `<path d="M 175 50 C 195 80, 195 120, 175 150" fill="none" stroke="#a855f7" stroke-width="4"/>
+                                <path d="M 190 50 C 220 50, 240 70, 280 100 C 240 130, 220 150, 190 150 C 210 120, 210 80, 190 50 Z" fill="#0f172a" stroke="#a855f7" stroke-width="4"/>`;
+                    break;
+                case 'XNOR':
+                    pathHtml = `<path d="M 175 50 C 195 80, 195 120, 175 150" fill="none" stroke="#10b981" stroke-width="4"/>
+                                <path d="M 190 50 C 220 50, 240 70, 270 100 C 240 130, 220 150, 190 150 C 210 120, 210 80, 190 50 Z" fill="#0f172a" stroke="#10b981" stroke-width="4"/>
+                                <circle cx="282" cy="100" r="10" fill="#0f172a" stroke="#10b981" stroke-width="3"/>`;
+                    break;
+            }
+            group.innerHTML = pathHtml;
+        }
+
+        function renderActiveTruthTable() {
+            const config = GATE_CONFIGS[activeGate];
+            const tbody = document.getElementById('active-truth-table-body');
+            document.getElementById('tt-gate-name').textContent = activeGate;
+
+            let html = '';
+            if (config.singleInput) {
+                [0, 1].forEach(a => {
+                    const out = config.eval(a);
+                    const isActive = a === inputA;
+                    html += `<tr class="${isActive ? 'bg-blue-900/40 border-l-4 border-blue-400 font-bold text-white' : 'text-slate-400 hover:bg-slate-800/40'} transition">
+                        <td class="py-2.5 px-4">${a}</td>
+                        <td class="py-2.5 px-4 ${out === 1 ? 'text-emerald-400 font-bold' : 'text-slate-500'}">${out}</td>
+                    </tr>`;
+                });
+            } else {
+                const rows = [[0,0], [0,1], [1,0], [1,1]];
+                rows.forEach(([a, b]) => {
+                    const out = config.eval(a, b);
+                    const isActive = (a === inputA && b === inputB);
+                    html += `<tr class="${isActive ? 'bg-blue-900/40 border-l-4 border-blue-400 font-bold text-white' : 'text-slate-400 hover:bg-slate-800/40'} transition">
+                        <td class="py-2.5 px-4">${a}</td>
+                        <td class="py-2.5 px-4">${b}</td>
+                        <td class="py-2.5 px-4 ${out === 1 ? 'text-emerald-400 font-bold' : 'text-slate-500'}">${out}</td>
+                    </tr>`;
+                });
+            }
+            tbody.innerHTML = html;
+        }
+
+        function highlightMatrixRow() {
+            ['00', '01', '10', '11'].forEach(id => {
+                const row = document.getElementById(`matrix-row-${id}`);
+                if (row) row.classList.remove('bg-blue-900/40', 'border-l-2', 'border-blue-400');
+            });
+            const activeId = `${inputA}${inputB}`;
+            const targetRow = document.getElementById(`matrix-row-${activeId}`);
+            if (targetRow) {
+                targetRow.classList.add('bg-blue-900/40', 'border-l-2', 'border-blue-400');
+            }
+        }
+
+        /* ==========================================================================
+           SECTION 3: UNIVERSAL GATES BUILDER ENGINE
+           ========================================================================== */
+        let universalTarget = 'NOT';
+
+        function setUniversalTarget(target) {
+            universalTarget = target;
+            playTone(500, 0.05, 'sine');
+
+            document.querySelectorAll('.univ-target-btn').forEach(btn => {
+                btn.className = 'univ-target-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-400 hover:text-white';
+            });
+            document.getElementById(`univ-target-${target}`).className = 'univ-target-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-emerald-600 text-white';
+
+            renderUniversalSVG();
+        }
+
+        function renderUniversalSVG() {
+            const svg = document.getElementById('univ-circuit-svg');
+            const countSpan = document.getElementById('univ-gate-count');
+            const expText = document.getElementById('univ-explanation-text');
+
+            if (universalTarget === 'NOT') {
+                countSpan.textContent = '1';
+                expText.innerHTML = '<strong>Synthesizing NOT using 1 NAND:</strong> Tie both inputs of a NAND gate together. NOT(A) = A NAND A.';
+                svg.innerHTML = `
+                    <line x1="100" y1="100" x2="220" y2="70" stroke="#10b981" stroke-width="4"/>
+                    <line x1="100" y1="100" x2="220" y2="130" stroke="#10b981" stroke-width="4"/>
+                    <circle cx="100" cy="100" r="8" fill="#10b981"/>
+                    <text x="70" y="105" fill="#ffffff" font-size="14" font-weight="bold" class="code-font">A</text>
+                    
+                    <path d="M 220 50 L 260 50 C 300 50, 300 150, 260 150 L 220 150 Z" fill="#0f172a" stroke="#f43f5e" stroke-width="4"/>
+                    <circle cx="312" cy="100" r="10" fill="#0f172a" stroke="#f43f5e" stroke-width="3"/>
+                    <line x1="322" y1="100" x2="450" y2="100" stroke="#10b981" stroke-width="4"/>
+                    <text x="460" y="105" fill="#10b981" font-size="16" font-weight="bold" class="code-font">Output = A'</text>
+                `;
+            } else if (universalTarget === 'AND') {
+                countSpan.textContent = '2';
+                expText.innerHTML = '<strong>Synthesizing AND using 2 NANDs:</strong> Invert the output of the first NAND gate using a second NAND gate acting as a NOT gate.';
+                svg.innerHTML = `
+                    <line x1="60" y1="70" x2="160" y2="70" stroke="#10b981" stroke-width="3"/>
+                    <line x1="60" y1="130" x2="160" y2="130" stroke="#10b981" stroke-width="3"/>
+                    <text x="40" y="75" fill="#ffffff" font-size="12" class="code-font">A</text>
+                    <text x="40" y="135" fill="#ffffff" font-size="12" class="code-font">B</text>
+
+                    <!-- NAND 1 -->
+                    <path d="M 160 50 L 200 50 C 230 50, 230 150, 200 150 L 160 150 Z" fill="#0f172a" stroke="#f43f5e" stroke-width="3"/>
+                    <circle cx="240" cy="100" r="8" fill="#0f172a" stroke="#f43f5e" stroke-width="2"/>
+                    
+                    <!-- Connection Wire -->
+                    <line x1="248" y1="100" x2="340" y2="70" stroke="#10b981" stroke-width="3"/>
+                    <line x1="248" y1="100" x2="340" y2="130" stroke="#10b981" stroke-width="3"/>
+
+                    <!-- NAND 2 (Inverter) -->
+                    <path d="M 340 50 L 380 50 C 410 50, 410 150, 380 150 L 340 150 Z" fill="#0f172a" stroke="#f43f5e" stroke-width="3"/>
+                    <circle cx="420" cy="100" r="8" fill="#0f172a" stroke="#f43f5e" stroke-width="2"/>
+                    <line x1="428" y1="100" x2="520" y2="100" stroke="#10b981" stroke-width="4"/>
+                    <text x="530" y="105" fill="#10b981" font-size="14" font-weight="bold" class="code-font">A · B</text>
+                `;
+            } else if (universalTarget === 'OR') {
+                countSpan.textContent = '3';
+                expText.innerHTML = '<strong>Synthesizing OR using 3 NANDs (De Morgan\'s Law):</strong> Invert inputs A and B using NAND inverters, then pass both into a 3rd NAND gate.';
+                svg.innerHTML = `
+                    <!-- Input A Inverter -->
+                    <path d="M 140 20 L 170 20 C 190 20, 190 80, 170 80 L 140 80 Z" fill="#0f172a" stroke="#f43f5e" stroke-width="2"/>
+                    <circle cx="198" cy="50" r="6" fill="#0f172a" stroke="#f43f5e" stroke-width="2"/>
+
+                    <!-- Input B Inverter -->
+                    <path d="M 140 120 L 170 120 C 190 120, 190 180, 170 180 L 140 180 Z" fill="#0f172a" stroke="#f43f5e" stroke-width="2"/>
+                    <circle cx="198" cy="150" r="6" fill="#0f172a" stroke="#f43f5e" stroke-width="2"/>
+
+                    <!-- Output NAND -->
+                    <path d="M 320 70 L 350 70 C 380 70, 380 130, 350 130 L 320 130 Z" fill="#0f172a" stroke="#f43f5e" stroke-width="3"/>
+                    <circle cx="388" cy="100" r="8" fill="#0f172a" stroke="#f43f5e" stroke-width="2"/>
+
+                    <line x1="204" y1="50" x2="320" y2="85" stroke="#10b981" stroke-width="3"/>
+                    <line x1="204" y1="150" x2="320" y2="115" stroke="#10b981" stroke-width="3"/>
+                    <line x1="396" y1="100" x2="500" y2="100" stroke="#10b981" stroke-width="4"/>
+                    <text x="510" y="105" fill="#10b981" font-size="14" font-weight="bold" class="code-font">A + B</text>
+                `;
+            } else {
+                countSpan.textContent = '4';
+                expText.innerHTML = '<strong>Synthesizing XOR using 4 NANDs:</strong> Combines intermediate negated states to calculate exclusive OR purely out of silicon NAND switches.';
+                svg.innerHTML = `
+                    <text x="250" y="105" fill="#f43f5e" font-size="16" font-weight="bold" text-anchor="middle" class="code-font">4 Interconnected NAND Gates Cascade</text>
+                `;
+            }
+        }
+
+        /* ==========================================================================
+           SECTION 4: XOR 2D DECISION BOUNDARY CANVAS
+           ========================================================================== */
+        let xorDemoGate = 'XOR';
+
+        function setXorDemoGate(gate) {
+            xorDemoGate = gate;
+            playTone(480, 0.05, 'sine');
+            document.querySelectorAll('.xor-demo-btn').forEach(btn => {
+                btn.className = 'xor-demo-btn px-2.5 py-1 rounded text-xs font-bold transition bg-slate-800 text-slate-300';
+            });
+            document.getElementById(`xor-demo-${gate}`).className = 'xor-demo-btn px-2.5 py-1 rounded text-xs font-bold transition bg-rose-600 text-white shadow';
+
+            drawXorCanvas();
+        }
+
+        function drawXorCanvas() {
+            const canvas = document.getElementById('xor-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Background Grid
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            for (let i = 40; i < w; i += 40) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(w, i); ctx.stroke();
+            }
+
+            // Axes
+            const margin = 60;
+            const size = w - margin * 2;
+
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(margin, h - margin); ctx.lineTo(w - margin / 2, h - margin);
+            ctx.moveTo(margin, h - margin); ctx.lineTo(margin, margin / 2);
+            ctx.stroke();
+
+            // Axis Labels
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '12px JetBrains Mono';
+            ctx.fillText('x₁', w - margin / 2 + 5, h - margin + 4);
+            ctx.fillText('x₂', margin - 10, margin / 2 - 5);
+
+            // Points data for gates
+            const points = [
+                { x: 0, y: 0, label: '(0,0)' },
+                { x: 0, y: 1, label: '(0,1)' },
+                { x: 1, y: 0, label: '(1,0)' },
+                { x: 1, y: 1, label: '(1,1)' }
+            ];
+
+            points.forEach(pt => {
+                let val = 0;
+                if (xorDemoGate === 'AND') val = pt.x & pt.y;
+                else if (xorDemoGate === 'OR') val = pt.x | pt.y;
+                else if (xorDemoGate === 'XOR') val = pt.x ^ pt.y;
+
+                pt.val = val;
+                pt.px = margin + pt.x * size;
+                pt.py = (h - margin) - pt.y * size;
+            });
+
+            // Draw Linear Separator Line for AND / OR
+            if (xorDemoGate === 'AND') {
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(margin, h - margin - size * 0.75);
+                ctx.lineTo(margin + size * 0.75, h - margin);
+                ctx.stroke();
+            } else if (xorDemoGate === 'OR') {
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(margin, h - margin - size * 0.25);
+                ctx.lineTo(margin + size * 0.25, h - margin);
+                ctx.stroke();
+            } else {
+                // XOR Failed attempt lines (Crossed dashed lines showing impossibility)
+                ctx.strokeStyle = '#f43f5e';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([6, 6]);
+                ctx.beginPath();
+                ctx.moveTo(margin + size * 0.1, h - margin - size * 0.9);
+                ctx.lineTo(margin + size * 0.9, h - margin - size * 0.1);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(margin + size * 0.1, h - margin - size * 0.1);
+                ctx.lineTo(margin + size * 0.9, h - margin - size * 0.9);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Draw Point Dots
+            points.forEach(pt => {
+                ctx.beginPath();
+                ctx.arc(pt.px, pt.py, 12, 0, Math.PI * 2);
+                ctx.fillStyle = pt.val === 1 ? '#10b981' : '#f43f5e';
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 11px JetBrains Mono';
+                ctx.fillText(pt.val, pt.px - 3, pt.py + 4);
+
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '10px Inter';
+                ctx.fillText(pt.label, pt.px - 14, pt.py + 26);
+            });
+        }
+
+        /* ==========================================================================
+           SECTION 5: PERCEPTRON TRAINING ENGINE
+           ========================================================================== */
+        let perceptronTarget = 'AND';
+        let w1 = 0.5;
+        let w2 = -0.2;
+        let bias = -0.3;
+        let learningRate = 0.1;
+        let epochCount = 0;
+        let isAutoTraining = false;
+        let autoTrainInterval = null;
+
+        const PERCEPTRON_DATASETS = {
+            'AND':  [[0,0,0], [0,1,0], [1,0,0], [1,1,1]],
+            'OR':   [[0,0,0], [0,1,1], [1,0,1], [1,1,1]],
+            'NAND': [[0,0,1], [0,1,1], [1,0,1], [1,1,0]],
+            'XOR':  [[0,0,0], [0,1,1], [1,0,1], [1,1,0]]
+        };
+
+        function setPerceptronGate(gate) {
+            perceptronTarget = gate;
+            playTone(450, 0.05, 'sine');
+            document.querySelectorAll('.p-gate-btn').forEach(btn => {
+                btn.className = 'p-gate-btn px-3 py-1 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-400';
+            });
+            document.getElementById(`p-gate-${gate}`).className = 'p-gate-btn px-3 py-1 rounded-lg text-xs font-bold transition bg-purple-600 text-white';
+
+            resetPerceptronWeights();
+        }
+
+        function resetPerceptronWeights() {
+            w1 = (Math.random() - 0.5) * 1.5;
+            w2 = (Math.random() - 0.5) * 1.5;
+            bias = (Math.random() - 0.5) * 1.5;
+            epochCount = 0;
+            if (isAutoTraining) toggleAutoTrain();
+            updatePerceptronUI();
+        }
+
+        function stepActivation(z) {
+            return z >= 0 ? 1 : 0;
+        }
+
+        function trainPerceptronStep() {
+            const dataset = PERCEPTRON_DATASETS[perceptronTarget];
+            let errors = 0;
+
+            dataset.forEach(([x1, x2, target]) => {
+                const z = w1 * x1 + w2 * x2 + bias;
+                const pred = stepActivation(z);
+                const error = target - pred;
+
+                if (error !== 0) {
+                    errors++;
+                    w1 += learningRate * error * x1;
+                    w2 += learningRate * error * x2;
+                    bias += learningRate * error;
+                }
+            });
+
+            epochCount++;
+            playTone(errors === 0 ? 800 : 300, 0.04, 'sine');
+            updatePerceptronUI();
+
+            if (errors === 0 && isAutoTraining) {
+                toggleAutoTrain();
+                playTone(1000, 0.2, 'triangle');
+            }
+        }
+
+        function toggleAutoTrain() {
+            isAutoTraining = !isAutoTraining;
+            const btn = document.getElementById('auto-train-btn');
+            const icon = document.getElementById('auto-train-icon');
+
+            if (isAutoTraining) {
+                icon.className = 'fa-solid fa-pause';
+                btn.classList.add('animate-pulse');
+                autoTrainInterval = setInterval(() => {
+                    trainPerceptronStep();
+                    if (epochCount > 100) toggleAutoTrain(); // cap max epochs
+                }, 150);
+            } else {
+                icon.className = 'fa-solid fa-play';
+                btn.classList.remove('animate-pulse');
+                clearInterval(autoTrainInterval);
+            }
+        }
+
+        function updatePerceptronManual() {
+            w1 = parseFloat(document.getElementById('slider-w1').value);
+            w2 = parseFloat(document.getElementById('slider-w2').value);
+            bias = parseFloat(document.getElementById('slider-b').value);
+            updatePerceptronUI();
+        }
+
+        function updatePerceptronUI() {
+            // Update Sliders and Labels
+            document.getElementById('slider-w1').value = w1;
+            document.getElementById('slider-w2').value = w2;
+            document.getElementById('slider-b').value = bias;
+
+            document.getElementById('slider-w1-label').textContent = w1.toFixed(2);
+            document.getElementById('slider-w2-label').textContent = w2.toFixed(2);
+            document.getElementById('slider-b-label').textContent = bias.toFixed(2);
+
+            document.getElementById('svg-w1-val').textContent = `w₁=${w1.toFixed(2)}`;
+            document.getElementById('svg-w2-val').textContent = `w₂=${w2.toFixed(2)}`;
+            document.getElementById('svg-b-val').textContent = `b=${bias.toFixed(2)}`;
+
+            document.getElementById('p-epoch-count').textContent = epochCount;
+
+            // Evaluate Dataset
+            const dataset = PERCEPTRON_DATASETS[perceptronTarget];
+            const tbody = document.getElementById('perceptron-eval-rows');
+            let totalErrors = 0;
+            let rowsHtml = '';
+
+            dataset.forEach(([x1, x2, target]) => {
+                const z = w1 * x1 + w2 * x2 + bias;
+                const pred = stepActivation(z);
+                const error = target - pred;
+                if (error !== 0) totalErrors++;
+
+                rowsHtml += `<tr>
+                    <td class="py-2 px-1 text-slate-300">${x1}</td>
+                    <td class="py-2 px-1 text-slate-300">${x2}</td>
+                    <td class="py-2 px-1 text-white font-bold">${target}</td>
+                    <td class="py-2 px-1 font-bold ${pred === target ? 'text-emerald-400' : 'text-rose-400'}">${pred}</td>
+                    <td class="py-2 px-1 ${error === 0 ? 'text-slate-500' : 'text-rose-400 font-bold'}">${error}</td>
+                </tr>`;
+            });
+
+            tbody.innerHTML = rowsHtml;
+
+            // Update Total Error Badge
+            const errSpan = document.getElementById('p-total-error');
+            const iconDiv = document.getElementById('p-convergence-icon');
+
+            if (totalErrors === 0) {
+                errSpan.textContent = '0 Errors (CONVERGED!)';
+                errSpan.className = 'text-lg sm:text-xl font-extrabold code-font text-emerald-400';
+                iconDiv.className = 'text-3xl text-emerald-400';
+                iconDiv.innerHTML = '<i class="fa-solid fa-circle-check animate-bounce"></i>';
+            } else {
+                errSpan.textContent = `${totalErrors} / 4 Classification Errors`;
+                errSpan.className = 'text-lg sm:text-xl font-extrabold code-font text-rose-400';
+                iconDiv.className = 'text-3xl text-rose-500';
+                iconDiv.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+            }
+        }
+
+        /* ==========================================================================
+           SECTION 7: GEMINI AI TUTOR & KNOWLEDGE QUIZ
+           ========================================================================== */
+        async function askAiTutor() {
+            const inputEl = document.getElementById('ai-user-input');
+            const chatBox = document.getElementById('ai-chat-output');
+            const query = inputEl.value.trim();
+            if (!query) return;
+
+            // User Message Bubble
+            chatBox.innerHTML += `<div class="bg-blue-900/30 border border-blue-500/30 p-2.5 rounded-lg text-white font-medium text-right ml-6">
+                ${query}
+            </div>`;
+            inputEl.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Loading Indicator
+            const loadingId = 'loading-' + Date.now();
+            chatBox.innerHTML += `<div id="${loadingId}" class="bg-slate-900 p-3 rounded-lg border border-slate-800 text-slate-400 italic flex items-center gap-2">
+                <i class="fa-solid fa-spinner animate-spin text-cyan-400"></i> Gemini AI is analyzing your question...
+            </div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const apiKey = ""; // Left empty as per specifications
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+                
+                const systemPrompt = "You are a world-class Computer Science Professor explaining logic gates, boolean algebra, universal NAND architecture, and neural perceptrons. Provide succinct, engaging, accurate 2-3 paragraph explanations to students.";
+                
+                const payload = {
+                    contents: [{ parts: [{ text: query }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] }
+                };
+
+                const res = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "I was unable to answer right now. Please try rephrasing!";
+
+                document.getElementById(loadingId).remove();
+                chatBox.innerHTML += `<div class="bg-slate-900 p-3 rounded-lg border border-slate-800 text-cyan-300 mr-6 leading-relaxed">
+                    ${reply.replace(/\n/g, '<br>')}
+                </div>`;
+            } catch (err) {
+                document.getElementById(loadingId).remove();
+                chatBox.innerHTML += `<div class="bg-rose-950/50 p-3 rounded-lg border border-rose-800 text-rose-300 mr-6">
+                    Error connecting to Gemini API. Please check your network connection!
+                </div>`;
+            }
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        /* QUIZ DATA & ENGINE */
+        const QUIZ_QUESTIONS = [
+            {
+                q: "Which logic gate outputs 1 ONLY when BOTH inputs are 1?",
+                options: ["OR Gate", "AND Gate", "XOR Gate", "NOT Gate"],
+                answer: 1,
+                exp: "An AND gate requires both Input A and Input B to be high (1) for activation."
+            },
+            {
+                q: "Why are NAND and NOR called 'Universal Gates'?",
+                options: [
+                    "They consume zero electrical power",
+                    "They can build ANY boolean function or computer circuit",
+                    "They operate twice as fast as AND gates",
+                    "They were invented by Alan Turing"
+                ],
+                answer: 1,
+                exp: "Any digital computer processor, ALU, or memory unit can be built using purely NAND or NOR gates."
+            },
+            {
+                q: "What caused the 1969 AI Winter after Minsky & Papert's publication?",
+                options: [
+                    "Single-layer perceptrons could not solve non-linearly separable functions like XOR",
+                    "Computers ran out of memory",
+                    "Silicon chips replaced vacuum tubes",
+                    "Neural networks were outlawed"
+                ],
+                answer: 0,
+                exp: "A single linear equation cannot separate the diagonal outputs of an XOR function, requiring Multi-Layer Perceptrons."
+            }
+        ];
+
+        let currentQuizIdx = 0;
+
+        function loadQuizQuestion() {
+            const q = QUIZ_QUESTIONS[currentQuizIdx];
+            document.getElementById('quiz-idx').textContent = currentQuizIdx + 1;
+            document.getElementById('quiz-question-text').textContent = q.q;
+
+            const container = document.getElementById('quiz-options-container');
+            let html = '';
+            q.options.forEach((opt, idx) => {
+                html += `<button onclick="checkQuizAnswer(${idx})" class="w-full text-left p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 hover:border-cyan-500 hover:text-white transition">
+                    ${String.fromCharCode(65 + idx)}. ${opt}
+                </button>`;
+            });
+            container.innerHTML = html;
+            document.getElementById('quiz-feedback').className = 'hidden';
+        }
+
+        function checkQuizAnswer(selectedIdx) {
+            const q = QUIZ_QUESTIONS[currentQuizIdx];
+            const feedback = document.getElementById('quiz-feedback');
+            
+            if (selectedIdx === q.answer) {
+                playTone(800, 0.15, 'triangle');
+                feedback.className = 'mt-4 p-3 rounded-xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 text-xs block';
+                feedback.innerHTML = `<strong><i class="fa-solid fa-circle-check"></i> Correct!</strong> ${q.exp}`;
+            } else {
+                playTone(250, 0.15, 'sine');
+                feedback.className = 'mt-4 p-3 rounded-xl bg-rose-950/80 border border-rose-500/50 text-rose-300 text-xs block';
+                feedback.innerHTML = `<strong><i class="fa-solid fa-circle-xmark"></i> Not quite!</strong> ${q.exp}`;
+            }
+
+            setTimeout(() => {
+                currentQuizIdx = (currentQuizIdx + 1) % QUIZ_QUESTIONS.length;
+                loadQuizQuestion();
+            }, 3000);
+        }
+
+        /* ==========================================================================
+           INITIALIZATION ON PAGE LOAD
+           ========================================================================== */
+        window.onload = function() {
+            selectGate('AND');
+            setUniversalTarget('NOT');
+            setXorDemoGate('XOR');
+            resetPerceptronWeights();
+            loadQuizQuestion();
+        };
+    </script>
+</body>
+</html>
